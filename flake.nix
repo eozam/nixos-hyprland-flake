@@ -13,27 +13,27 @@
       nixpkgs-unstable,
     }:
     {
-      nixosConfigurations = {
-        nixos = nixpkgs-stable.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [
-            ./hardware-configuration.nix
-            ./configuration.nix
-            (
-              { config, pkgs, ... }:
-              {
-                nixpkgs.overlays = [
-                  (final: prev: {
-                    unstable = import nixpkgs-unstable {
-                      inherit (prev) system;
-                      config.allowUnfree = config.nixpkgs.config.allowUnfree;
+      nixosConfigurations.nixos = nixpkgs-stable.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          (
+            { config, pkgs, ... }:
+            {
+              nixpkgs.overlays = [
+                (final: prev: {
+                  unstable = import nixpkgs-unstable {
+                    system = prev.system;
+                    config = prev.config // {
+                      allowUnfreePredicate = config.nixpkgs.config.allowUnfreePredicate;
+                      allowUnfree = config.nixpkgs.config.allowUnfree;
                     };
-                  })
-                ];
-              }
-            )
-          ];
-        };
+                  };
+                })
+              ];
+            }
+          )
+          ./configuration.nix
+        ];
       };
     };
 }
